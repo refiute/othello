@@ -79,7 +79,6 @@ def count_empty(mp):
         for x in y:
             count += int(x == -1)
     return count
-            
 
 def init_mp():
     mp = np.zeros((8, 8), dtype=int)

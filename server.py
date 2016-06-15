@@ -41,21 +41,22 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         if len(place) == 0:
             self.write_message({"cmd": "pass", "color": color})
             return
-        
+
         out = othello.run_program(self.programs[color], self.mp, self.color)
         pos = tuple(out.split(", "))
-        
+
         # validate
         if not out in place:
             self.write_message({"cmd": "invalid", "color": self.color})
             self.close()
             return
-        
+
         othello.put_hand(self.mp, out[0], out[1], self.color)
         self.write_message({"cmd": "hand", "color": self.color, "map": self.mp})
-        
+
         print(pos)
         othello.print_mp(self.mp)
+        self.color ^= 1
 
 def get_args():
     parser = argparse.ArgumentParser(description="othello server")
