@@ -39,7 +39,8 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # pass check
         place = othello.can_turn(self.mp, self.color)
         if len(place) == 0:
-            self.write_message({"cmd": "pass", "color": color})
+            self.write_message({"cmd": "pass", "color": self.color})
+            self.color ^= 1
             return
 
         out = othello.run_program(self.programs[color], self.mp, self.color)
