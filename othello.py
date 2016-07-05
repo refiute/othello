@@ -40,7 +40,6 @@ def can_move(mp, y, x, color):
 
     return place
 
-
 def can_turn(mp, color):
     place = []
     for y in range(0, len(mp)):
@@ -102,10 +101,12 @@ def read_mp(filename):
 
 def print_mp(mp):
     black = 0
+    stone = 0
     for y in mp:
         s = ""
         for x in y:
-            black += int(s==1)
+            black += int(x==1)
+            black += int(x!=-1)
             s += u"●" if x == 0 else u"○" if x == 1 else "＿"
         print(s)
         print("black: %d, white %d"%(black, 64-black))
