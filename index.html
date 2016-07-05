@@ -1,7 +1,29 @@
+<!DOCTYPE html>
 <html>
 	<head>
+	<meta charset="utf-8">
+	<title>オセロ</title>
+	
 	</head>
+	
 	<body>
-		<script src="socket.js"></script>
+	<script src="socket.js"></script>
+	<div id="screen">
+	<canvas id="cvs"></canvas>
+	</div>
+	<script src="script.js" charset="utf-8"></script>
+	
+	<script src="main.js" charset="utf-8"></script>
+	
+	<div id="controller">
+		<input type="button" name="ボタン" value="最初に戻す" onClick="sta()">
+		<input type="button" name="ボタン" value="1手戻す" onClick="pre()">
+		<input type="button" name="ボタン" value="1手進める" onClick="nxt()">
+		<input type="button" name="ボタン" value="最新に進める" onClick="end()">
+		<br>
+		<form name="Form">
+		<input type="checkbox" name="auto" value="auto">自動更新
+		</form>
+	</div>
 	</body>
 </html>

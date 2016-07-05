@@ -121,7 +121,7 @@ def run_program(program, mp, color):
     proc = subprocess.Popen(program, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newline=True)
     try:
         out, err = proc.communicate(input=data, timeout=5)
-    except: TimeoutExpired:
+    except:
         proc.kill()
 
     return out
