@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import sys
 import argparse
+import logging
+import json
 
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
 import tornado.template
+import tornado.options
 
 import othello
 
@@ -17,10 +21,14 @@ class MainHandler(tornado.web.RequestHandler):
         self.write(loader.load("index.html").generate())
 
 class WSHandler(tornado.websocket.WebSocketHandler):
-    def __init__(self, programs, mp):
-        self.programs = programs
-        self.mp = mp
+    def __init__(self, *args, **kwargs):
+        self.programs = kwargs.pop('programs')
+        self.mp = kwargs.pop('mp')
         self.color = 0
+        super(WSHandler, self).__init__(*args, **kwargs)
+
+    def check_origin(self, origin):
+        return True
 
     def open(self):
         print('connection opened ...')
@@ -32,30 +40,36 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         # empty count
         empty = othello.count_empty(self.mp)
         if empty == 0:
-            self.write_message({"cmd": "end"})
+            msg = json.dumps({"cmd": "end"})
+            self.write_message(msg)
             self.close()
             return
 
         # pass check
         place = othello.can_turn(self.mp, self.color)
         if len(place) == 0:
-            self.write_message({"cmd": "pass", "color": self.color})
+            msg = json.dumps({"cmd": "pass", "color": self.color})
+            self.write_message(msg)
             self.color ^= 1
             return
 
-        out = othello.run_program(self.programs[color], self.mp, self.color)
-        pos = tuple(out.split(", "))
+        out = othello.run_program(self.programs[self.color], self.mp, self.color)
+        pos = tuple(map(int, out.split()))
+        print(pos)
 
         # validate
-        if not out in place:
-            self.write_message({"cmd": "invalid", "color": self.color})
+        if not pos in place:
+            msg = json.dumps({"cmd": "invalid", "color": self.color})
+            print(msg)
+            self.write_message(msg)
             self.close()
             return
 
-        othello.put_hand(self.mp, out[0], out[1], self.color)
-        self.write_message({"cmd": "hand", "color": self.color, "map": self.mp})
+        othello.put_hand(self.mp, pos[0], pos[1], self.color)
 
-        print(pos)
+        msg = json.dumps({"cmd": "hand", "color": self.color, "mp": self.mp.tolist()})
+        self.write_message(msg)
+
         othello.print_mp(self.mp)
         self.color ^= 1
 
@@ -76,10 +90,12 @@ if __name__ == "__main__":
     else:
         mp = othello.init_mp()
 
+    tornado.options.parse_command_line()
     application = tornado.web.Application([
         (r'/', MainHandler),
-        (r'/ws', WSHandler([args.program1, args.program2], mp))
-    ])
+        (r'/ws', WSHandler, {'programs': [args.program1, args.program2], 'mp': mp}),
+        (r'/assets/(.*)', tornado.web.StaticFileHandler, {'path': os.path.join(os.getcwd(), "assets")}),
+    ], debug=True)
     application.listen(1919)
 
     tornado.ioloop.IOLoop.instance().start()

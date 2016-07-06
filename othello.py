@@ -101,15 +101,15 @@ def read_mp(filename):
 
 def print_mp(mp):
     black = 0
-    stone = 0
+    white = 0
     for y in mp:
         s = ""
         for x in y:
             black += int(x==1)
-            black += int(x!=-1)
+            white += int(x==0)
             s += u"●" if x == 0 else u"○" if x == 1 else "＿"
         print(s)
-        print("black: %d, white %d"%(black, 64-black))
+    print("black: %d, white %d"%(black, white))
 
 def run_program(program, mp, color):
     data = ""
@@ -118,13 +118,13 @@ def run_program(program, mp, color):
 
     data += str(color)+"\n"
 
-    proc = subprocess.Popen(program, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newline=True)
-    try:
-        out, err = proc.communicate(input=data, timeout=5)
-    except:
-        proc.kill()
+    proc = subprocess.Popen(program, stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
 
+    #try:
+    out, err = proc.communicate(input=data, timeout=5)
     return out
+    #except:
+    #    proc.kill()
 
 if __name__ == "__main__":
     run_program("", init_mp(), "white")
